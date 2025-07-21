@@ -54,7 +54,7 @@ $$ L = \min \left(50,\; 1 + 49 \times f(\text{exp}) \right) $$
 
 其中，$f(\text{exp})$ 是一个归一化的函数，其值域为 $[0, 1]$，并带有一个调节曲线形状的参数 $\gamma$：
 
-$$ f(\text{exp}) = \left( \frac{\log(\text{exp} + 1)}{\log(\text{exp}_{\text{cap}} + 1)} \right)^{\gamma} $$
+$$ f(\text{exp}) = \left( \frac{\ln(\text{exp} + 1)}{\ln(\text{exp}_{\text{cap}} + 1)} \right)^{\gamma} $$
 
 这里，$\text{exp}_{\text{cap}}$ 是达到满级（50级）所需的经验值，即 $50,000$。
 
@@ -64,17 +64,17 @@ $$ f(\text{exp}) = \left( \frac{\log(\text{exp} + 1)}{\log(\text{exp}_{\text{cap
 
 将约束条件代入公式：
 
-$$ 40 = 1 + 49 \times \left( \frac{\log(25000 + 1)}{\log(50000 + 1)} \right)^{\gamma} $$
+$$ 40 = 1 + 49 \times \left( \frac{\ln(25000 + 1)}{\ln(50000 + 1)} \right)^{\gamma} $$
 
 为了方便计算，我们进行如下变换：
 
-$$ \frac{40 - 1}{49} = \left( \frac{\log(25001)}{\log(50001)} \right)^{\gamma} $$
+$$ \frac{40 - 1}{49} = \left( \frac{\ln(25001)}{\ln(50001)} \right)^{\gamma} $$
 
 设：
 
 $$ t = \frac{39}{49} \approx 0.7959 $$
 
-$$ r = \frac{\log(25001)}{\log(50001)} $$
+$$ r = \frac{\ln(25001)}{\ln(50001)} $$
 
 则方程变为：
 
@@ -86,8 +86,8 @@ $$ \ln(t) = \gamma \ln(r) \implies \gamma = \frac{\ln(t)}{\ln(r)} $$
 
 代入具体数值：
 
-*   $\log(25001) \approx 10.1266$
-*   $\log(50001) \approx 10.8198$
+*   $\ln(25001) \approx 10.1266$
+*   $\ln(50001) \approx 10.8198$
 *   $r \approx \frac{10.1266}{10.8198} \approx 0.9360$
 *   $\ln(t) = \ln(0.7959) \approx -0.2284$
 *   $\ln(r) = \ln(0.9360) \approx -0.0662$
@@ -100,7 +100,7 @@ $$ \gamma = \frac{-0.2284}{-0.0662} \approx 3.45 $$
 
 将计算出的 $\gamma$ 代入，我们得到最终的经验值到等级的转换公式：
 
-$$ L = \text{floor} \left( \min \left( 50,\; 1 + 49 \times \left( \frac{\log(\text{exp} + 1)}{\log(50001)} \right)^{3.45} \right) \right) $$
+$$ L = \text{floor} \left( \min \left( 50, 1 + 49 \times \left( \frac{\ln(\text{exp} + 1)}{\ln(50001)} \right)^{3.45} \right) \right) $$
 
 *注：程序中使用了 `floor` 向下取整，确保等级为整数。*
 
