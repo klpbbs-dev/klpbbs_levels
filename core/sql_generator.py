@@ -84,12 +84,12 @@ SELECT uid, level as old_level, exp, NOW() as backup_time
 FROM {table_name};
 
 -- 更新用户等级
-UPDATE {table_name} 
+UPDATE {table_name}
 SET level = calculate_level(exp)
 WHERE exp IS NOT NULL;
 
 -- 验证更新结果
-SELECT 
+SELECT
     COUNT(*) as total_users,
     MIN(level) as min_level,
     MAX(level) as max_level,
@@ -97,7 +97,7 @@ SELECT
 FROM {table_name};
 
 -- 等级分布统计
-SELECT 
+SELECT
     level,
     COUNT(*) as user_count,
     ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM {table_name}), 2) as percentage
@@ -106,7 +106,7 @@ GROUP BY level
 ORDER BY level;
 
 -- 迁移前后对比
-SELECT 
+SELECT
     b.old_level,
     u.level as new_level,
     COUNT(*) as user_count
@@ -155,22 +155,22 @@ BEGIN
     IF exp < 0 THEN
         exp := 0;
     END IF;
-    
+
     -- 处理0经验值
     IF exp = 0 THEN
         RETURN 1;
     END IF;
-    
+
     -- 计算等级
     base_val := LN(exp + 1) / LN(exp_cap + 1);
     scaled_val := POWER(base_val, gamma);
     level_result := 1 + 49 * scaled_val;
-    
+
     -- 确保等级在1-50范围内
     IF level_result > 50 THEN
         level_result := 50;
     END IF;
-    
+
     RETURN FLOOR(level_result);
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
@@ -181,12 +181,12 @@ SELECT uid, level as old_level, exp, NOW() as backup_time
 FROM {table_name};
 
 -- 更新用户等级
-UPDATE {table_name} 
+UPDATE {table_name}
 SET level = calculate_level(exp)
 WHERE exp IS NOT NULL;
 
 -- 验证更新结果
-SELECT 
+SELECT
     COUNT(*) as total_users,
     MIN(level) as min_level,
     MAX(level) as max_level,
@@ -194,7 +194,7 @@ SELECT
 FROM {table_name};
 
 -- 等级分布统计
-SELECT 
+SELECT
     level,
     COUNT(*) as user_count,
     ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM {table_name}), 2) as percentage
@@ -235,9 +235,9 @@ SELECT uid, level as old_level, exp, datetime('now') as backup_time
 FROM {table_name};
 
 -- 更新用户等级（使用分段函数近似计算）
-UPDATE {table_name} 
-SET level = 
-    CASE 
+UPDATE {table_name}
+SET level =
+    CASE
         WHEN exp <= 0 THEN 1
         WHEN exp <= 50 THEN 2
         WHEN exp <= 100 THEN 2
@@ -269,7 +269,7 @@ SET level =
 WHERE exp IS NOT NULL;
 
 -- 验证更新结果
-SELECT 
+SELECT
     COUNT(*) as total_users,
     MIN(level) as min_level,
     MAX(level) as max_level,
@@ -277,7 +277,7 @@ SELECT
 FROM {table_name};
 
 -- 等级分布统计
-SELECT 
+SELECT
     level,
     COUNT(*) as user_count,
     ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM {table_name}), 2) as percentage
