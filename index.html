@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>等级查询</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: #f5f7fa;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 18px;
+            color: #6b7280;
+            font-weight: 400;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            padding: 32px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .input-section h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #1a1a1a;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            background: #f9fafb;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 14px 24px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .calculate-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .result-item {
+            text-align: center;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 12px;
+        }
+
+        .result-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .result-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .level-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .progress-section {
+            margin-top: 32px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #3b82f6;
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .chart-section h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #1a1a1a;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 500px;
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        }
+
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .header h1 {
+                font-size: 36px;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 20px 16px;
+            }
+
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .card {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>等级查询</h1>
+            <p>输入经验值，查看新旧等级对比</p>
+        </div>
+
+        <div class="content">
+            <div class="card">
+                <div class="input-section">
+                    <h2>输入查询</h2>
+                    <div class="input-group">
+                        <label for="expInput">经验值</label>
+                        <input type="number" id="expInput" placeholder="0 - 50000" min="0" max="50000" />
+                    </div>
+
+                    <button class="calculate-btn" onclick="calculateLevels()">
+                        计算
+                    </button>
+
+                    <div id="resultSection" style="display: none">
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">旧系统等级</div>
+                                <div class="result-value" id="oldLevel">-</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">新系统等级</div>
+                                <div class="result-value" id="newLevel">-</div>
+                            </div>
+                        </div>
+
+                        <div class="result-item" style="margin-top: 16px">
+                            <div class="result-label">当前经验值</div>
+                            <div class="result-value" id="currentExp" style="font-size: 24px">
+                                -
+                            </div>
+                        </div>
+
+                        <div class="result-item" style="margin-top: 16px">
+                            <div class="result-label">距离下一级</div>
+                            <div class="result-value" id="nextLevelExp" style="font-size: 24px">
+                                -
+                            </div>
+                        </div>
+
+                        <div class="progress-section">
+                            <div class="result-label">等级进度</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="progress-text" id="progressText">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 0">
+                <div class="chart-section">
+                    <div class="chart-container">
+                        <canvas id="levelChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chart = null;
+
+        // 等级计算函数（复制自Python版本）
+        function expToLevel(exp) {
+            exp = Math.max(exp, 0);
+            const expCap = 50000;
+            const gamma = 3.45;
+
+            if (exp === 0) return 1;
+
+            const base = Math.log(exp + 1) / Math.log(expCap + 1);
+            const scaled = Math.pow(base, gamma);
+            const level = 1 + 49 * scaled;
+
+            return Math.min(50, Math.floor(level));
+        }
+
+        function levelToMinExp(level) {
+            if (level <= 1) return 0;
+            if (level >= 50) return 50000;
+
+            const expCap = 50000;
+            const gamma = 3.45;
+
+            const scaled = (level - 1) / 49;
+            const base = Math.pow(scaled, 1 / gamma);
+            const exp = Math.exp(base * Math.log(expCap + 1)) - 1;
+
+            return Math.floor(exp);
+        }
+
+        function oldExpToLevel(exp) {
+            exp = Math.max(exp, 0);
+            if (exp < 200) return 1;
+            else if (exp < 1000) return 2;
+            else if (exp < 5000) return 3;
+            else if (exp < 10000) return 4;
+            else if (exp < 50000) return 5;
+            else return 6;
+        }
+
+        function calculateLevels() {
+            const expInput = document.getElementById("expInput");
+            const exp = parseInt(expInput.value) || 0;
+
+            if (exp < 0 || exp > 50000) {
+                alert("请输入0-50000之间的经验值！");
+                return;
+            }
+
+            const newLevel = expToLevel(exp);
+            const oldLevel = oldExpToLevel(exp);
+            const currentMinExp = levelToMinExp(newLevel);
+            const nextMinExp = levelToMinExp(newLevel + 1);
+            const remainingExp = nextMinExp - exp;
+            const progress =
+                newLevel < 50
+                    ? ((exp - currentMinExp) / (nextMinExp - currentMinExp)) * 100
+                    : 100;
+
+            // 更新显示
+            document.getElementById(
+                "oldLevel"
+            ).innerHTML = `<span class="level-badge">${oldLevel}</span>`;
+            document.getElementById(
+                "newLevel"
+            ).innerHTML = `<span class="level-badge">${newLevel}</span>`;
+            document.getElementById("currentExp").textContent =
+                exp.toLocaleString();
+            document.getElementById("nextLevelExp").textContent =
+                newLevel < 50 ? `${remainingExp.toLocaleString()}` : "已满级";
+
+            document.getElementById("progressFill").style.width = `${progress}%`;
+            document.getElementById("progressText").textContent =
+                newLevel < 50 ? `${Math.round(progress)}%` : "100%";
+
+            document.getElementById("resultSection").style.display = "block";
+
+            updateChart(exp, newLevel, oldLevel);
+        }
+
+        function updateChart(userExp, userNewLevel, userOldLevel) {
+            const ctx = document.getElementById("levelChart").getContext("2d");
+
+            const expValues = [];
+            const newLevels = [];
+            const oldLevels = [];
+
+            for (let exp = 0; exp <= 50000; exp += 5000) {
+                expValues.push(exp);
+                newLevels.push(expToLevel(exp));
+                oldLevels.push(oldExpToLevel(exp));
+            }
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            const annotations = {};
+            if (userExp >= 0) {
+                annotations.userPoint = {
+                    type: "point",
+                    xValue: userExp,
+                    yValue: userNewLevel,
+                    backgroundColor: "#ef4444",
+                    borderColor: "white",
+                    borderWidth: 3,
+                    radius: 8,
+                    hoverRadius: 10,
+                };
+                annotations.userLine = {
+                    type: "line",
+                    xMin: userExp,
+                    xMax: userExp,
+                    yMin: 0,
+                    yMax: userNewLevel,
+                    borderColor: "#ef4444",
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    opacity: 0.5,
+                };
+                annotations.userLabel = {
+                    type: "label",
+                    xValue: userExp,
+                    yValue: userNewLevel + 2,
+                    content: `您的位置: ${userExp.toLocaleString()} EXP → 等级 ${userNewLevel}`,
+                    backgroundColor: "#ef4444",
+                    color: "white",
+                    font: {
+                        size: 12,
+                        weight: "600",
+                    },
+                    padding: 8,
+                    borderRadius: 6,
+                };
+            }
+
+            chart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: expValues,
+                    datasets: [
+                        {
+                            label: "新等级系统",
+                            data: newLevels,
+                            borderColor: "#3b82f6",
+                            backgroundColor: "rgba(59, 130, 246, 0.1)",
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            pointHoverBackgroundColor: "#3b82f6",
+                            pointHoverBorderColor: "white",
+                            pointHoverBorderWidth: 2,
+                        },
+                        {
+                            label: "旧等级系统",
+                            data: oldLevels,
+                            borderColor: "#6b7280",
+                            backgroundColor: "rgba(107, 114, 128, 0.1)",
+                            borderWidth: 2,
+                            borderDash: [8, 4],
+                            fill: false,
+                            tension: 0,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            pointHoverBackgroundColor: "#6b7280",
+                            pointHoverBorderColor: "white",
+                            pointHoverBorderWidth: 2,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: "index",
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: "top",
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    weight: "500",
+                                },
+                            },
+                        },
+                        annotation: {
+                            annotations: annotations,
+                        },
+                    },
+                    scales: {
+                        x: {
+                            type: "linear",
+                            title: {
+                                display: true,
+                                text: "经验值",
+                                font: {
+                                    size: 14,
+                                    weight: "500",
+                                },
+                            },
+                            grid: {
+                                color: "#e5e7eb",
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                callback: function (value) {
+                                    return Math.round(value / 1000) + "k";
+                                },
+                                font: {
+                                    size: 12,
+                                },
+                                stepSize: 5000,
+                            },
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: "等级",
+                                font: {
+                                    size: 14,
+                                    weight: "500",
+                                },
+                            },
+                            min: 1,
+                            max: 50,
+                            grid: {
+                                color: "#e5e7eb",
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                stepSize: 5,
+                                font: {
+                                    size: 12,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        // 页面加载时初始化图表
+        window.addEventListener("load", function () {
+            updateChart(0, 1, 1);
+        });
+
+        // 回车键触发计算
+        document
+            .getElementById("expInput")
+            .addEventListener("keypress", function (e) {
+                if (e.key === "Enter") {
+                    calculateLevels();
+                }
+            });
+    </script>
+</body>
+
+</html>
